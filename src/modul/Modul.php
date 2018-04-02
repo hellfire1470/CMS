@@ -93,7 +93,7 @@ abstract class Modul {
         return $this->_content;
     }
 
-    public function _WriteAllSettings() {
+    private function _WriteAllSettings() {
         $this->_WriteSetting('installed', $this->_isInstalled);
         $this->_WriteSetting('enabled', $this->_isEnabled);
     }
