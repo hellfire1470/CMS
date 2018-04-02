@@ -13,8 +13,8 @@
  */
 class SecondMod extends Modul {
 
-    public function __constructor($name, $version = 1.0, $descr = '', $author = '') {
-        parent::__constructor($name, $version, $descr, $author);
+    public function __construct($name, $version = 1.0, $descr = '', $author = '') {
+        parent::__construct($name, $version, $descr, $author);
     }
 
     //put your code here

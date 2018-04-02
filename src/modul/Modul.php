@@ -30,8 +30,8 @@ abstract class Modul {
         $this->_description = $description;
         $this->_author      = $author;
 
-        $this->_isInstalled = empty($this->_GetSetting('installed')) ? false : true;
-        $this->_isEnabled   = empty($this->_GetSetting('enabled')) ? false : true;
+        $this->_isInstalled = empty($this->GetData('installed')) ? false : true;
+        $this->_isEnabled   = empty($this->GetData('enabled')) ? false : true;
     }
 
     public function GetName() {
@@ -41,7 +41,7 @@ abstract class Modul {
     public function Enable() {
         if (!$this->_isEnabled && $this->OnEnable()) {
             $this->_isEnabled = true;
-            $this->_WriteAllSettings();
+            $this->_WriteAllData();
         }
     }
 
@@ -52,21 +52,21 @@ abstract class Modul {
     public function Disable() {
         if ($this->_isEnabled && $this->OnDisable()) {
             $this->_isEnabled = false;
-            $this->_WriteAllSettings();
+            $this->_WriteAllData();
         }
     }
 
     public function Install() {
         if (!$this->_isInstalled && $this->OnInstall()) {
             $this->_isInstalled = true;
-            $this->_WriteAllSettings();
+            $this->_WriteAllData();
         }
     }
 
     public function Uninstall() {
         if ($this->_isInstalled && $this->OnUninstall()) {
             $this->_isInstalled = false;
-            $this->_WriteAllSettings();
+            $this->_WriteAllData();
         }
     }
 
@@ -94,15 +94,15 @@ abstract class Modul {
     }
 
     private function _WriteAllSettings() {
-        $this->_WriteSetting('installed', $this->_isInstalled);
-        $this->_WriteSetting('enabled', $this->_isEnabled);
+        $this->SetData('installed', $this->_isInstalled);
+        $this->SetData('enabled', $this->_isEnabled);
     }
 
-    private function _WriteSetting($key, $value) {
+    protected function SetData($key, $value) {
         DBConfig::Set($this->_GetModulIdentifier() . ":" . $key, $value);
     }
 
-    private function _GetSetting($key) {
+    protected function GetData($key) {
         return DBConfig::Get($this->_GetModulIdentifier() . ":" . $key);
     }
 
@@ -111,7 +111,7 @@ abstract class Modul {
     }
 
     private function _GetModulIdentifier() {
-        return 'setting_modul_' . $this->_GetId();
+        return 'data-modul-' . $this->_GetId();
     }
 
 // <editor-fold defaultstate="collapsed">

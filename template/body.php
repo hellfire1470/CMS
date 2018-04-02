@@ -1,4 +1,4 @@
 <body>
     <section>
-        <div class="modul">%MYSECONDMODUL%</div>
+        <div class="modul">%EASYWEBLIBADMIN%</div>
     </section>

@@ -9,6 +9,7 @@ require_once 'config.php';
 require_once '../../K3ksPHP/Database/Db.php';
 require_once __DIR__ . '/src/database/DBConfig.php';
 require_once __DIR__ . '/src/modul/ModulManager.php';
+require_once __DIR__ . '/src/AjaxManager.php';
 
 /*
  * Register Modules
@@ -29,6 +30,8 @@ ModulManager::LoadModules();
 foreach (ModulManager::GetRegisteredModules() as $modul) {
     $modul->Load();
 }
+
+AjaxManager::HandleEvents();
 
 // LOAD Template
 if (file_exists(__DIR__ . '/template/template.php')) {
