@@ -12,23 +12,36 @@
  */
 class EasyWebLibModul extends Modul {
 
-    private $_jquery_active;
-    private $_bootstrap_js_active;
-    private $_bootstrap_css_active;
-    private $_notify_active;
-    private $_notify_override_alert;
+    private $_settings = [
+        'jquery-active'         => '',
+        'bootstrap-js-active'   => '',
+        'bootstrap-css-active'  => '',
+        'notify-active'         => '',
+        'notify-override-alert' => '',
+        'angular-active'        => '',
+        'vue-active'            => ''
+    ];
 
     public function __construct($name, $version = 1.0, $descr = '', $author = '') {
         parent::__construct($name, $version, $descr, $author);
-        $this->_jquery_active         = $this->GetData('jquery-active');
-        $this->_bootstrap_js_active   = $this->GetData('bootstrap-js-active');
-        $this->_bootstrap_css_active  = $this->GetData('bootstrap-css-active');
-        $this->_notify_active         = $this->GetData('notify-active');
-        $this->_notify_override_alert = $this->GetData('notify-override-alert');
+        foreach ($this->_settings as $key => $_value) {
+            $this->_settings[$key] = $this->GetData($key);
+        }
     }
 
     public function OnLoad() {
         return true;
+    }
+
+    private function GenerateCheckbox($id, $text) {
+        ?>
+        <div class="checkbox">
+            <label for="EasyWebLib-<?php echo $id; ?>">
+                <input type="checkbox" name="EasyWebLib-<?php echo $id; ?>" id="EasyWebLib-<?php echo $id; ?>" <?php echo $this->_settings[$id] ? 'checked' : '' ?>/>
+                <?php echo $text; ?>
+            </label>
+        </div>
+        <?php
     }
 
     public function OnAdmin() {
@@ -37,50 +50,39 @@ class EasyWebLibModul extends Modul {
             <div class="card">
                 <div class="card-header"> Bootstrap </div>
                 <div class="card-body">
-
-                    <div class="checkbox">
-                        <label for="EasyWebLib-bootstrap-css-active">
-                            <input type="checkbox" name="EasyWebLib-bootstrap-css-active" id="EasyWebLib-bootstrap-css-active" <?php echo $this->_bootstrap_css_active ? 'checked' : '' ?>/>
-                            Use Bootstrap CSS
-                        </label>
-                    </div>
-                    <div class="checkbox">
-                        <label for="EasyWebLib-bootstrap-js-active">
-                            <input type="checkbox" name="EasyWebLib-bootstrap-js-active" id="EasyWebLib-bootstrap-js-active" <?php echo $this->_bootstrap_js_active ? 'checked' : '' ?>/>
-                            Use Bootstrap.js
-                        </label>
-                    </div>
+                    <?php $this->GenerateCheckbox('bootstrap-css-active', 'Use Bootstrap CSS') ?>
+                    <?php $this->GenerateCheckbox('bootstrap-js-active', 'Use Bootstrap JS') ?>
                 </div>
             </div>
             <div class="card">
                 <div class="card-header"> jQuery.js </div>
                 <div class="card-body">
-                    <div class="checkbox">
-                        <label for="EasyWebLib-jquery-active">
-                            <input type="checkbox" name="EasyWebLib-jquery-active" id="EasyWebLib-jquery-active" <?php echo $this->_jquery_active ? 'checked' : '' ?>/>
-                            Use jQuery.js
-                        </label>
-                    </div>
+                    <?php $this->GenerateCheckbox('jquery-active', 'Use jQuery') ?>
                 </div>
             </div>
             <div class="card">
                 <div class="card-header"> Notify.js </div>
                 <div class="card-body">
-                    <div class="checkbox">
-                        <label for="EasyWebLib-notify-active">
-                            <input type="checkbox" name="EasyWebLib-notify-active" id="EasyWebLib-notify-active" <?php echo $this->_notify_active ? 'checked' : '' ?>/>
-                            Use Notify.js
-                        </label>
-                    </div>
-                    <div class="checkbox">
-                        <label for="EasyWebLib-notify-override-alert">
-                            <input type="checkbox" name="EasyWebLib-notify-override-alert" id="EasyWebLib-notify-override-alert" <?php echo $this->_notify_override_alert ? 'checked' : '' ?>/>
-                            Override alert with Notify
-                        </label>
-                    </div>
+
+                    <?php $this->GenerateCheckbox('notify-active', 'Use Notify.js') ?>
+                    <?php $this->GenerateCheckbox('notify-override-alert', 'Override alert message with Notify') ?>
+
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header"> Angular.js </div>
+                <div class="card-body">
+                    <?php $this->GenerateCheckbox('angular-active', 'Use Angular.js') ?>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header"> Vue.js </div>
+                <div class="card-body">
+                    <?php $this->GenerateCheckbox('vue-active', 'Use Vue.js') ?>
                 </div>
             </div>
             <button type="submit" class="btn btn-primary">Speichern</button>
+            <button type="reset" class="btn btn-secondary">Zurücksetzen</button>
             <script>
                 function ajax_request(action, formid, callback) {
                     $('#' + formid).on('submit', function (e) {
@@ -90,14 +92,20 @@ class EasyWebLibModul extends Modul {
                             url: '',
                             data: 'action=' + action + '&' + $(this).serialize(),
                             success: function (msg) {
-                                callback(JSON.parse(msg));
+                                try {
+                                    callback(JSON.parse(msg));
+                                } catch (e) {
+                                    callback();
+                                }
                             }
-                        })
-                    })
+                        });
+                    });
                 }
 
                 ajax_request('EasyWebLibModul-ajax-save-admin', 'EasyWebLib-admin-settings', function (msg) {
-                    alert(msg.data.message);
+                    if (msg !== undefined) {
+                        alert(msg.data.message);
+                    }
                 })
             </script>
         </form>
@@ -111,31 +119,37 @@ class EasyWebLibModul extends Modul {
 
     public function ShowJS() {
         ?>
-        <?php if ($this->_jquery_active) : ?>
+        <?php if ($this->_settings['jquery-active']) : ?>
             <script src="/modules/EasyWebLib/js/jquery-3.3.1.min.js"></script>
         <?php endif; ?>
-        <?php if ($this->_notify_active) : ?>
+        <?php if ($this->_settings['notify-active']) : ?>
             <script src="/modules/EasyWebLib/js/notify.min.js"></script>
         <?php endif; ?>
-        <?php if ($this->_notify_override_alert) : ?>
+        <?php if ($this->_settings['notify-override-alert']) : ?>
             <script>
                 function alert(msg, status) {
-                    if (status == undefined) {
+                    if (status === undefined) {
                         status = "info";
                     }
                     $.notify(msg, status);
                 }
             </script>
         <?php endif; ?>
-        <?php if ($this->_bootstrap_js_active) : ?>
+        <?php if ($this->_settings['bootstrap-js-active']) : ?>
             <script src="/modules/EasyWebLib/js/bootstrap.js"></script>
+        <?php endif; ?>
+        <?php if ($this->_settings['vue-active']) : ?>
+            <script src="/modules/EasyWebLib/js/vue.min.js"></script>
+        <?php endif; ?>
+        <?php if ($this->_settings['angular-active']) : ?>
+            <script src="/modules/EasyWebLib/js/angular.min.js"></script>
             <?php
         endif;
     }
 
     public function ShowCSS() {
         ?>
-        <?php if ($this->_bootstrap_css_active) : ?>
+        <?php if ($this->_settings['bootstrap-css-active']) : ?>
             <link rel="stylesheet" type="text/css" href="/modules/EasyWebLib/css/bootstrap-grid.css">
             <link rel="stylesheet" type="text/css" href="/modules/EasyWebLib/css/bootstrap-reboot.css">
             <link rel="stylesheet" type="text/css" href="/modules/EasyWebLib/css/bootstrap.css">
@@ -143,34 +157,21 @@ class EasyWebLibModul extends Modul {
         endif;
     }
 
+    private function _SaveData($key, &$_orig, $change_to) {
+        if ($_orig != $change_to) {
+            $_orig = $change_to;
+            $this->SetData($key, $change_to);
+        }
+    }
+
     public function ajax_save_admin($params) {
         $msg = ['success' => true, 'data' => []];
 
-        $bootstrap_css_active  = !empty($params['EasyWebLib-bootstrap-css-active']) ? true : false;
-        $bootstrap_js_active   = !empty($params['EasyWebLib-bootstrap-js-active']) ? true : false;
-        $jquery_active         = !empty($params['EasyWebLib-jquery-active']) ? true : false;
-        $notify_active         = !empty($params['EasyWebLib-notify-active']) ? true : false;
-        $notify_override_alert = !empty($params['EasyWebLib-notify-override-alert']) ? true : false;
-
-        if ($this->_bootstrap_css_active != $bootstrap_css_active) {
-            $this->SetData('bootstrap-css-active', $bootstrap_css_active);
+        foreach ($this->_settings as $key => $_value) {
+            $val = $params['EasyWebLib-' . $key];
+            $this->_SaveData($key, $_value, $val);
         }
 
-        if ($this->_bootstrap_js_active != $bootstrap_js_active) {
-            $this->SetData('bootstrap-js-active', $bootstrap_js_active);
-        }
-
-        if ($this->_jquery_active != $jquery_active) {
-            $this->SetData('jquery-active', $jquery_active);
-        }
-
-        if ($this->_notify_active != $notify_active) {
-            $this->SetData('notify-active', $notify_active);
-        }
-
-        if ($this->_notify_active != $notify_active || $this->_notify_override_alert != $notify_override_alert) {
-            $this->SetData('notify-override-alert', ($notify_active && $notify_override_alert));
-        }
         $msg['data']['message'] = "Einstellungen übernommen";
         return $msg;
     }

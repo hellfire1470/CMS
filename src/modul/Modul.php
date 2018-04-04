@@ -13,7 +13,6 @@
  */
 abstract class Modul {
 
-    private $_id;
     private $_name;
     private $_version;
     private $_description;
@@ -71,8 +70,12 @@ abstract class Modul {
     }
 
     public function Load() {
-        if ($this->_isInstalled && $this->_isEnabled && !$this->_isLoaded && $this->OnLoad()) {
-            $this->_isLoaded = true;
+        if ($this->_isInstalled && $this->_isEnabled && !$this->_isLoaded) {
+            ob_start();
+            if ($this->OnLoad()) {
+                $this->_isLoaded = true;
+            }
+            ob_end_clean();
         }
     }
 
@@ -93,12 +96,15 @@ abstract class Modul {
         return $this->_content;
     }
 
-    private function _WriteAllSettings() {
+    private function _WriteAlldata() {
         $this->SetData('installed', $this->_isInstalled);
         $this->SetData('enabled', $this->_isEnabled);
     }
 
     protected function SetData($key, $value) {
+        if (empty($value)) {
+            $value = '0';
+        }
         DBConfig::Set($this->_GetModulIdentifier() . ":" . $key, $value);
     }
 
