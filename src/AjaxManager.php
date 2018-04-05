@@ -16,28 +16,31 @@ class AjaxManager {
             return true;
         } else {
             self::$_ajax_events[$action] = [$obj_or_method, $method];
+            return true;
         }
         return false;
     }
 
     public static function HandleEvents() {
 
-        $error_reporting = error_reporting();
-        error_reporting(0);
-
         if (empty($_POST)) {
             return;
         }
 
+        $error_reporting = error_reporting();
+        error_reporting(0);
+
+
         $pAction = filter_input(INPUT_POST, 'action');
 
-        foreach (self::$_ajax_events as $action => $event) {
-            if ($pAction == $action) {
-                echo json_encode(call_user_func($event, filter_input_array(INPUT_POST)));
-                die();
+        if (!empty($pAction)) {
+            foreach (self::$_ajax_events as $action => $event) {
+                if ($pAction == $action) {
+                    echo json_encode(call_user_func($event, filter_input_array(INPUT_POST)));
+                    die();
+                }
             }
         }
-
         error_reporting($error_reporting);
     }
 

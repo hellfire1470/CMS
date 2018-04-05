@@ -38,8 +38,8 @@ class ModulManager {
     }
 
     public static function LoadModules() {
-        foreach (self::$_registeredModules as $module) {
-            $module->Load();
+        foreach (self::$_registeredModules as $modul) {
+            $modul->Load();
         }
     }
 

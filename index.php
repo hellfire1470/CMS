@@ -27,10 +27,6 @@ foreach ($dirs as $dir) {
 
 ModulManager::LoadModules();
 
-foreach (ModulManager::GetRegisteredModules() as $modul) {
-    $modul->Load();
-}
-
 AjaxManager::HandleEvents();
 
 // LOAD Template
