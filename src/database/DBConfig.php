@@ -11,15 +11,13 @@
  *
  * @author Alexander
  */
-require_once __DIR__ . '/IDB.php';
-
 use K3ksPHP\Database\DbTable as DbT;
 use K3ksPHP\Database\DbKeyValue as DbKV;
 use K3ksPHP\Database\DbField as DbF;
 use K3ksPHP\Database\DbFieldType as DbFT;
 use K3ksPHP\Database\DbFieldAttribute as DbFA;
 
-class DBConfig implements IDB {
+class DBConfig {
 
     private static $_db          = null;
     private static $_initialized = false;
@@ -38,7 +36,7 @@ class DBConfig implements IDB {
     }
 
     public static function Set($key, $value) {
-        if (self::$_db == null) {
+        if (!self::$_initialized) {
             self::_Initialize();
         }
 
@@ -46,7 +44,7 @@ class DBConfig implements IDB {
     }
 
     public static function Get($key) {
-        if (self::$_db == null) {
+        if (!self::$_initialized) {
             self::_Initialize();
         }
         $result = self::$_db->LoadAllByColumn('ckey', $key);

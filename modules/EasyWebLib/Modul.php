@@ -19,7 +19,7 @@ class EasyWebLibModul extends Modul {
         'notify-active'         => '',
         'notify-override-alert' => '',
         'angular-active'        => '',
-        'vue-active'            => ''
+        'vue-active'            => '',
     ];
 
     public function __construct($name, $version = 1.0, $descr = '', $author = '') {
@@ -40,6 +40,16 @@ class EasyWebLibModul extends Modul {
                 <input type="checkbox" name="EasyWebLib-<?php echo $id; ?>" id="EasyWebLib-<?php echo $id; ?>" <?php echo $this->_settings[$id] ? 'checked' : '' ?>/>
                 <?php echo $text; ?>
             </label>
+        </div>
+        <?php
+    }
+
+    private function GenerateInput($id, $type, $text, $placeholder = null) {
+        ?>
+        <div class="checkbox">
+            <label for="EasyWebLib-<?php echo $id; ?>"><?php echo $text; ?> </label>
+            <input type="<?php echo $type; ?>" name="EasyWebLib-<?php echo $id; ?>" id="EasyWebLib-<?php echo $id; ?>" value="<?php echo $this->_settings[$id]; ?>" />
+
         </div>
         <?php
     }
@@ -81,8 +91,8 @@ class EasyWebLibModul extends Modul {
                     <?php $this->GenerateCheckbox('vue-active', 'Use Vue.js') ?>
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary">Speichern</button>
-            <button type="reset" class="btn btn-secondary">Zurücksetzen</button>
+            <button type = "submit" class = "btn btn-primary">Speichern</button>
+            <button type = "reset" class = "btn btn-secondary">Zurücksetzen</button>
             <script>
                 function ajax_request(action, formid, callback) {
                     $('#' + formid).on('submit', function (e) {

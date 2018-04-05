@@ -5,14 +5,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
-/**
- *
- * @author Alexander
- */
-interface IDB {
-
-    public static function Set($key, $value);
-
-    public static function Get($key);
+if ($this->IsLoggedIn()) {
+    require __DIR__ . '/logged_in.php';
+} else {
+    require __DIR__ . '/logged_out.php';
 }
