@@ -8,7 +8,7 @@
 session_start();
 
 require_once 'config.php';
-require_once '../../K3ksPHP/Database/Db.php';
+require_once '../K3ksPHP/Database/Db.php';
 require_once __DIR__ . '/src/database/DBConfig.php';
 require_once __DIR__ . '/src/modul/ModulManager.php';
 require_once __DIR__ . '/src/AjaxManager.php';
