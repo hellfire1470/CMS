@@ -15,14 +15,14 @@
         </div>
         <div class="row">
             <div class="col">
-                <form id="profile-modul-logout">
+                <form id="user-modul-logout">
                     <input class="btn btn-primary" type="submit" value="Logout">
                     <script>
-                        ajax_request('profile-modul-logout', 'profile-modul-logout', function (msg) {
+                        ajax_request('user-modul-logout', 'user-modul-logout', function (msg) {
                             if (msg === undefined)
                                 return;
 
-                            profile_modul_load_aside();
+                            user_modul_load_aside();
                             alert(msg.data.message);
                         })
                     </script>

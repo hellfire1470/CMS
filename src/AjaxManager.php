@@ -27,21 +27,26 @@ class AjaxManager {
             return;
         }
 
-        $error_reporting = error_reporting();
-        error_reporting(0);
-
-
         $pAction = filter_input(INPUT_POST, 'action');
 
-        if (!empty($pAction)) {
-            foreach (self::$_ajax_events as $action => $event) {
-                if ($pAction == $action) {
-                    echo json_encode(call_user_func($event, filter_input_array(INPUT_POST)));
-                    die();
-                }
-            }
+        if (empty($pAction)) {
+            return;
         }
-        error_reporting($error_reporting);
+
+        foreach (self::$_ajax_events as $action => $event) {
+            if ($pAction != $action) {
+                continue;
+            }
+
+            $result = call_user_func($event, filter_input_array(INPUT_POST));
+
+            if (is_array($result)) {
+                echo json_encode($result);
+            } else {
+                echo $result;
+            }
+            die();
+        }
     }
 
 }

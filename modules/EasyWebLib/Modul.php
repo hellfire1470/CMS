@@ -19,7 +19,7 @@ class EasyWebLibModul extends Modul {
         'notify-active'         => '',
         'notify-override-alert' => '',
         'angular-active'        => '',
-        'vue-active'            => '',
+        'vue-active'            => ''
     ];
 
     public function __construct($name, $version = 1.0, $descr = '', $author = '') {
@@ -94,9 +94,15 @@ class EasyWebLibModul extends Modul {
             <button type = "submit" class = "btn btn-primary">Speichern</button>
             <button type = "reset" class = "btn btn-secondary">Zurücksetzen</button>
             <script>
-                function ajax_request(action, formid, callback) {
+                function ajax_request(action, formid, callback, precall) {
                     $('#' + formid).on('submit', function (e) {
+
                         e.preventDefault();
+
+                        if (precall !== undefined && !precall()) {
+                            return;
+                        }
+
                         $.ajax({
                             type: 'post',
                             url: '',
@@ -105,7 +111,7 @@ class EasyWebLibModul extends Modul {
                                 try {
                                     callback(JSON.parse(msg));
                                 } catch (e) {
-                                    callback();
+                                    callback(msg, true);
                                 }
                             }
                         });
@@ -137,12 +143,12 @@ class EasyWebLibModul extends Modul {
         <?php endif; ?>
         <?php if ($this->_settings['notify-override-alert']) : ?>
             <script>
-                function alert(msg, status) {
-                    if (status === undefined) {
-                        status = "info";
+                    function alert(msg, status) {
+                        if (status === undefined) {
+                            status = "info";
+                        }
+                        $.notify(msg, status);
                     }
-                    $.notify(msg, status);
-                }
             </script>
         <?php endif; ?>
         <?php if ($this->_settings['bootstrap-js-active']) : ?>

@@ -19,13 +19,13 @@ use K3ksPHP\Database\DbFieldAttribute as DbFA;
 
 class DBConfig {
 
-    private static $_db          = null;
+    private static $_db = null;
     private static $_initialized = false;
 
     private static function _Initialize() {
         if (!self::$_initialized) {
             self::$_initialized = true;
-            self::$_db          = new DbT("config", [
+            self::$_db = new DbT("config", [
                 new DbF('id', DbFT::INTEGER, 11, [DbFA::AUTO_INCREMENT, DbFA::PRIMARY_KEY]),
                 new DbF('ckey', DbFT::VARCHAR, 200, [DbFA::UNIQUE]),
                 new DbF('cvalue', DbFT::TEXT)
@@ -40,7 +40,7 @@ class DBConfig {
             self::_Initialize();
         }
 
-        self::$_db->Set([new DbKV('ckey', $key), new DbKV('cvalue', $value)]);
+        self::$_db->Set([new DbKV('ckey', $key), new DbKV('cvalue', $value)], true);
     }
 
     public static function Get($key) {

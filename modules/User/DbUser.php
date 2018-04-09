@@ -19,13 +19,13 @@ use K3ksPHP\Database\DbFieldAttribute as DbFA;
 
 class DbUser {
 
-    private static $_db          = null;
+    private static $_db = null;
     private static $_initialized = false;
 
     private static function _Initialize() {
         if (!self::$_initialized) {
             self::$_initialized = true;
-            self::$_db          = new DbT("users", [
+            self::$_db = new DbT("users", [
                 new DbF('id', DbFT::INTEGER, 11, [DbFA::AUTO_INCREMENT, DbFA::PRIMARY_KEY]),
                 new DbF('firstname', DbFT::VARCHAR, 200),
                 new DbF('lastname', DbFT::VARCHAR, 200),
@@ -42,7 +42,7 @@ class DbUser {
             self::_Initialize();
         }
 
-        self::$_db->Set($key_values);
+        return self::$_db->Set($key_values);
     }
 
     public static function SetAll($firstname, $lastname, $password, $email, $id = null) {
@@ -54,7 +54,7 @@ class DbUser {
         $kv[] = new DbKV('lastname', $lastname);
         $kv[] = new DbKV('password', hash('sha512', $password));
         $kv[] = new DbKV('email', $email);
-        self::Set($kv);
+        return self::Set($kv);
     }
 
     public static function GetByEmail($email) {
