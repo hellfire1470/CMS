@@ -29,7 +29,7 @@ class UserModul extends Modul {
         $hash = hash('sha512', $password);
         if ($hash == $user->GetAttr('password')) {
             $_SESSION['user'] = serialize($user);
-            self::$_user = $user;
+            self::$_user      = $user;
             return true;
         }
         return false;
@@ -54,31 +54,13 @@ class UserModul extends Modul {
     //put your code here
     public function ShowAside() {
         ?>
-        <div id="user-modul-aside">
-            <script>
-                function user_modul_show_aside(html) {
-                    $('#user-modul-aside').html(html);
-                }
+        <div id="user-modul-aside"></div>
 
-                function user_modul_load_aside() {
-                    $.ajax('', {
-                        method: 'post',
-                        data: {action: 'user-modul-load-aside'},
-                        success: function (msg) {
-                            if (msg.length > 0) {
-                                try {
-                                    var msg = JSON.parse(msg);
-                                    user_modul_show_aside(msg.data.html);
-                                } catch (e) {
-
-                                }
-                            }
-                        }
-                    });
-                }
-                user_modul_load_aside();
-            </script>
-        </div>
+        <script type="text/javascript" src="modules/User/js/user-modul.js"></script>
+        <script>
+            var userModul = new UserModul('user-modul-aside');
+            userModul.LoadAside();
+        </script>
         <?php
     }
 
@@ -86,14 +68,7 @@ class UserModul extends Modul {
         ?>
         <form id="user-modul-change-layout">
             <input type="hidden" name="form-user-layout" value="<?php echo $navigateTo; ?>">
-            <input class="btn btn-secondary" type="submit" value="<?php echo $btnVal; ?>">
-            <script>
-                ajax_request('user-modul-change-layout', 'user-modul-change-layout', function (msg) {
-                    if (msg !== undefined && msg.success) {
-                        user_modul_show_aside(msg.data.html);
-                    }
-                });
-            </script>
+            <input class="btn btn-secondary" type="submit" value="<?php echo $btnVal; ?>" onclick="userModul._ChangeLayout()">
         </form>
 
         <?php
@@ -113,11 +88,16 @@ class UserModul extends Modul {
         }
 
 
-        $success = $this->Login($params['form-user-login-email'], $params['form-user-login-password']);
+        $success        = $this->Login($params['form-user-login-email'], $params['form-user-login-password']);
         $res['success'] = $success;
 
         if ($success) {
             $res['data']['message'] = 'Logged in as ' . self::$_user->GetAttr('firstname');
+            $res['data']['user']    = [
+                'firstname' => self::$_user->GetAttr('firstname'),
+                'lastname'  => self::$_user->GetAttr('lastname'),
+                'email'     => self::$_user->GetAttr('email')
+            ];
         }
         return $res;
     }
@@ -162,10 +142,10 @@ class UserModul extends Modul {
         $res = ['success' => false, 'data' => ['message' => '']];
 
         $firstname = $params[$preKey . 'firstname'];
-        $lastname = $params[$preKey . 'lastname'];
-        $email = $params[$preKey . 'email'];
-        $pass1 = $params[$preKey . 'password'];
-        $pass2 = $params[$preKey . 'password2'];
+        $lastname  = $params[$preKey . 'lastname'];
+        $email     = $params[$preKey . 'email'];
+        $pass1     = $params[$preKey . 'password'];
+        $pass2     = $params[$preKey . 'password2'];
 
         if (empty($firstname) ||
                 empty($lastname) ||
@@ -177,7 +157,7 @@ class UserModul extends Modul {
         }
 
         if ($pass1 == $pass2) {
-            $success = UserModul::CreateUser($firstname, $lastname, $pass1, $email);
+            $success        = UserModul::CreateUser($firstname, $lastname, $pass1, $email);
             $res['success'] = $success;
             if ($success) {
                 $res['data']['message'] = 'Benutzer wurde erstellt';
@@ -201,7 +181,7 @@ class UserModul extends Modul {
 
         $this->_SetActiveLayout($param['form-user-layout']);
 
-        $res['success'] = true;
+        $res['success']      = true;
         $res['data']['html'] = $this->_GetLayout();
 
         return $res;

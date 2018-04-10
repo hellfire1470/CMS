@@ -16,16 +16,7 @@
         <div class="row">
             <div class="col">
                 <form id="user-modul-logout">
-                    <input class="btn btn-primary" type="submit" value="Logout">
-                    <script>
-                        ajax_request('user-modul-logout', 'user-modul-logout', function (msg) {
-                            if (msg === undefined)
-                                return;
-
-                            user_modul_load_aside();
-                            alert(msg.data.message);
-                        })
-                    </script>
+                    <input class="btn btn-primary" type="submit" value="Logout" onclick="userModul._Logout()">
                 </form>
             </div>
         </div>

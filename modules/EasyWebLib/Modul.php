@@ -94,31 +94,37 @@ class EasyWebLibModul extends Modul {
             <button type = "submit" class = "btn btn-primary">Speichern</button>
             <button type = "reset" class = "btn btn-secondary">Zurücksetzen</button>
             <script>
-                function ajax_request(action, formid, callback, precall) {
-                    $('#' + formid).on('submit', function (e) {
+                var ajax = {
+                    requests: [],
+                    request: function (action, formid, callback, precall) {
 
-                        e.preventDefault();
+                        this.requests[action] = function () {
+                            $('#' + formid).on('submit', function (e) {
 
-                        if (precall !== undefined && !precall()) {
-                            return;
-                        }
+                                e.preventDefault();
 
-                        $.ajax({
-                            type: 'post',
-                            url: '',
-                            data: 'action=' + action + '&' + $(this).serialize(),
-                            success: function (msg) {
-                                try {
-                                    callback(JSON.parse(msg));
-                                } catch (e) {
-                                    callback(msg, true);
+                                if (precall !== undefined && !precall()) {
+                                    return;
                                 }
-                            }
-                        });
-                    });
-                }
 
-                ajax_request('EasyWebLibModul-ajax-save-admin', 'EasyWebLib-admin-settings', function (msg) {
+                                $.ajax({
+                                    type: 'post',
+                                    url: '',
+                                    data: 'action=' + action + '&' + $(this).serialize(),
+                                    success: function (msg) {
+                                        try {
+                                            callback(JSON.parse(msg));
+                                        } catch (e) {
+                                            callback(msg, true);
+                                        }
+                                    }
+                                });
+                            });
+                        }
+                        this.requests[action]();
+                    }
+                }
+                ajax.request('EasyWebLibModul-ajax-save-admin', 'EasyWebLib-admin-settings', function (msg) {
                     if (msg !== undefined) {
                         alert(msg.data.message);
                     }

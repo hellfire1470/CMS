@@ -6,4 +6,4 @@
  * and open the template in the editor.
  */
 
-require __DIR__ . '/' . $this->_show_form . '.php';
+include __DIR__ . '/' . $this->_show_form . '.php';

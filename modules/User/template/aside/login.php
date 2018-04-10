@@ -20,23 +20,10 @@
             </div>
             <div class="row">
                 <div class="col">
-                    <input class="btn btn-primary" type="submit" value="Login">
+                    <input class="btn btn-primary" type="submit" value="Login" onclick="userModul._Login()">
                 </div>
             </div>
         </form>
         <?php UserModul::GetNavigationForm('register', 'Registrieren') ?>
     </div>
 </div>
-</div>
-<script>
-    ajax_request('user-modul-login', 'form-user-login', function (msg) {
-        if (msg !== undefined) {
-            var status = msg.success ? 'success' : 'error';
-            alert(msg.data.message, status);
-            if (msg.success) {
-                user_modul_load_aside();
-            }
-        }
-    });
-</script>
-</form>
