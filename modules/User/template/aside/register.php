@@ -32,7 +32,7 @@
                 <label for="form-user-register-password2">Passwort</label>
                 <input class="form-control" type="password" name="form-user-register-password2" id="form-user-register-password2" placeholder="Passwort Wiederholen">
             </div>
-            <input class="btn btn-primary" type="submit" value="Registrieren">
+            <input class="btn btn-primary" type="submit" value="Registrieren" onclick="console.log(this); return false;">
 
         </form>
         <?php UserModul::GetNavigationForm('login', 'Zurück zum Login'); ?>

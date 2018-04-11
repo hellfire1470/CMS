@@ -15,8 +15,8 @@
         </div>
         <div class="row">
             <div class="col">
-                <form id="user-modul-logout">
-                    <input class="btn btn-primary" type="submit" value="Logout" onclick="userModul._Logout()">
+                <form id="user-modul-logout" onsubmit="UserModul.Logout(); return false;">
+                    <input class="btn btn-primary" type="submit" value="Logout">
                 </form>
             </div>
         </div>

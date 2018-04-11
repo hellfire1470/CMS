@@ -15,7 +15,8 @@ require_once __DIR__ . '/DbUser.php';
 class UserModul extends Modul {
 
     private static $_user;
-    private $_show_form = 'login';
+    public static $modul_prefix = 'user-modul-';
+    private $_show_form         = 'login';
 
     public static function CreateUser($firstname, $lastname, $password, $email) {
         return DbUser::SetAll($firstname, $lastname, $password, $email);
@@ -47,6 +48,7 @@ class UserModul extends Modul {
         if (self::IsLoggedIn()) {
             self::$_user = unserialize($_SESSION['user']);
         }
+        add_header('<script type="text/javascript" src="modules/User/js/user-modul.js"></script>');
         $this->_SetActiveLayout();
         return true;
     }
@@ -56,22 +58,38 @@ class UserModul extends Modul {
         ?>
         <div id="user-modul-aside"></div>
 
-        <script type="text/javascript" src="modules/User/js/user-modul.js"></script>
+
         <script>
-            var userModul = new UserModul('user-modul-aside');
-            userModul.LoadAside();
+            UserModul.init('user-modul-aside');
+            UserModul.LoadAside();
+            UserModul.AddListener('onlogin', function (user) {
+                alert('Logged in as ' + user.firstname, 'success');
+                UserModul.LoadAside('profile');
+            });
+            UserModul.AddListener('onlogout', function () {
+                alert('Logged out', 'success');
+                UserModul.LoadAside();
+            });
         </script>
         <?php
     }
 
     public static function GetNavigationForm($navigateTo, $btnVal) {
         ?>
-        <form id="user-modul-change-layout">
-            <input type="hidden" name="form-user-layout" value="<?php echo $navigateTo; ?>">
-            <input class="btn btn-secondary" type="submit" value="<?php echo $btnVal; ?>" onclick="userModul._ChangeLayout()">
-        </form>
-
+        <button class="btn btn-secondary" onclick="UserModul.LoadAside('<?php echo $navigateTo; ?>');
+                return false;"><?php echo $btnVal; ?></button>
         <?php
+    }
+
+    private function _GetPublicUserData() {
+        if (!$this->IsLoggedIn()) {
+            return [];
+        }
+        return [
+            'firstname' => self::$_user->GetAttr('firstname'),
+            'lastname'  => self::$_user->GetAttr('lastname'),
+            'email'     => self::$_user->GetAttr('email')
+        ];
     }
 
     public function ajax_login($params) {
@@ -82,22 +100,18 @@ class UserModul extends Modul {
 
         $res = ['success' => false, 'data' => ['message' => 'Login failed']];
 
-        if (empty($params['form-user-login-email']) || empty($params['form-user-login-password'])) {
+        if (empty($params['email']) || empty($params['password'])) {
             $res['data']['message'] = 'Some fields are empty';
             return $res;
         }
 
 
-        $success        = $this->Login($params['form-user-login-email'], $params['form-user-login-password']);
+        $success        = $this->Login($params['email'], $params['password']);
         $res['success'] = $success;
 
         if ($success) {
             $res['data']['message'] = 'Logged in as ' . self::$_user->GetAttr('firstname');
-            $res['data']['user']    = [
-                'firstname' => self::$_user->GetAttr('firstname'),
-                'lastname'  => self::$_user->GetAttr('lastname'),
-                'email'     => self::$_user->GetAttr('email')
-            ];
+            $res['data']['user']    = $this->_GetPublicUserData();
         }
         return $res;
     }
@@ -117,6 +131,7 @@ class UserModul extends Modul {
 
     private function _SetActiveLayout($layout = null) {
         if (!empty($layout)) {
+            //todo: add protection
             $this->_show_form = $layout;
             return;
         }
@@ -127,7 +142,10 @@ class UserModul extends Modul {
         }
     }
 
-    public function ajax_load_aside() {
+    public function ajax_load_aside($params) {
+        if (!empty($params['layout'])) {
+            $this->_SetActiveLayout($params['layout']);
+        }
 
         $res = ['success' => true, 'data' => ['html' => '']];
 
@@ -171,19 +189,8 @@ class UserModul extends Modul {
         return $res;
     }
 
-    public function ajax_change_layout($param) {
-        $res = ['success' => false, 'data' => ['html' => '']];
-
-        if (empty($param['form-user-layout'])) {
-            return $res;
-        }
-
-
-        $this->_SetActiveLayout($param['form-user-layout']);
-
-        $res['success']      = true;
-        $res['data']['html'] = $this->_GetLayout();
-
+    public function ajax_get_user_data() {
+        $res = ['success' => true, 'data' => ['user' => $this->_GetPublicUserData()]];
         return $res;
     }
 
@@ -193,8 +200,8 @@ $modul = new UserModul("UserModul");
 ModulManager::RegisterModul($modul);
 
 ModulManager::RegisterShortcut('%USERPROFILE_ASIDE%', $modul, 'ShowAside');
-AjaxManager::RegisterEvent('user-modul-login', $modul, 'ajax_login');
-AjaxManager::RegisterEvent('user-modul-logout', $modul, 'ajax_logout');
-AjaxManager::RegisterEvent('user-modul-register', $modul, 'ajax_register');
-AjaxManager::RegisterEvent('user-modul-change-layout', $modul, 'ajax_change_layout');
-AjaxManager::RegisterEvent('user-modul-load-aside', $modul, 'ajax_load_aside');
+AjaxManager::RegisterEvent(UserModul::$modul_prefix . 'login', $modul, 'ajax_login');
+AjaxManager::RegisterEvent(UserModul::$modul_prefix . 'logout', $modul, 'ajax_logout');
+AjaxManager::RegisterEvent(UserModul::$modul_prefix . 'register', $modul, 'ajax_register');
+AjaxManager::RegisterEvent(UserModul::$modul_prefix . 'load-aside', $modul, 'ajax_load_aside');
+AjaxManager::RegisterEvent(UserModul::$modul_prefix . 'get-user-data', $modul, 'ajax_get_user_data');

@@ -3,33 +3,61 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-class UserModul{
+
+var UserModul = {
+    asideId: 'user-modul-aside',
+    events: [],
+    user: undefined,
+    modulPrefix: 'user-modul-',
     
-    constructor(asideId){
+    init: function(asideId){
         this.asideId = asideId;
-        this.events = [];
-    }
+        this._GetUser();
+    },
     
-    AddEvent(event, callback){
+    _GetUser: function(){
+        $.ajax({
+            method: 'post',
+            data: {action: this.modulPrefix + 'get-user-data'},
+            success: function(msg){
+                try{
+                    var msg = JSON.parse(msg);
+                    if(msg.success && msg.data.user !== undefined && msg.data.user.length !== 0){
+                        this.user = msg.data.user;
+                        this.CallEvent('onuserchanged', msg.data.user);
+                    }
+                }catch (e){
+                    this.user = undefined;
+                    this.CallEvent('onuserchanged', undefined);
+                }
+            },
+            context: this
+        });
+    },
+    
+    AddListener: function(event, callback){
+        if(event === undefined) { return; }
+        if(callback === undefined) { return; }
+        event = event.toLowerCase();
         if(this.events[event] === undefined) {
             this.events[event] = [];
         }
         this.events[event].push(callback);
-    }
+    },
     
-    CallEvent(event, params){
+    CallEvent: function (event, params){
         if(this.events[event] !== undefined){
             for(var i = 0; i < this.events[event].length; i++){
                 this.events[event][i](params);
             }
         }
-    }
+    },
 
     
-    LoadAside() {
+    LoadAside: function(layout) {
         $.ajax('', {
             method: 'post',
-            data: {action: 'user-modul-load-aside'},
+            data: {action: this.modulPrefix + 'load-aside', layout: layout},
             success: function (msg) {
                 if (msg.length > 0) {
                     try {
@@ -42,13 +70,87 @@ class UserModul{
             },
             context: this
         });
-    }
+    },
     
-    ShowAside(html) {
+    ShowAside: function(html) {
         $('#' + this.asideId).html(html);
-    }
+    },
     
-    _Login(){
+    Login: function(email, password){
+        var data = {
+            action: this.modulPrefix + 'login',
+            email: email,
+            password: password
+        };
+        $.ajax({
+            method: 'post',
+            data: data,
+            success: function(msg){
+                try{
+                    var msg = JSON.parse(msg);
+                    if(msg.success){
+                        this.user = msg.data.user;
+                        this.CallEvent('onlogin', msg.data.user);
+                        this.CallEvent('onuserchanged', msg.data.user);
+                    }
+                }catch (e){
+                    
+                }
+            },
+            context: this
+        });
+    },
+    
+    Logout: function(){
+        $.ajax({
+            method: 'post',
+            data: {action: this.modulPrefix + 'logout'},
+            success: function(msg){
+                try{
+                    var json = JSON.parse(msg);
+                    if(json.success){
+                        this.user = undefined;
+                        this.CallEvent('onlogout');
+                        this.CallEvent('onuserchanged', undefined);
+                    }
+                } catch(e){
+                    
+                }
+            },
+            context: this
+        });
+    },
+    
+    Register: function(email, password, firstname, lastname){
+
+        if(email === undefined || password === undefined ||email.length === 0 || password.length === 0){
+            return;
+        }
+        var data = {
+            action: this.modulPrefix + 'register',
+            email: email,
+            password: password,
+            firstname: firstname,
+            lastname: lastname
+        };
+        $.ajax({
+            method: 'post',
+            data: data,
+            success: function(msg){
+                alert(msg);
+            },
+            context: this
+        })
+    },
+    
+    ChangeLayout: function(navigateTo){
+        
+    }
+};
+
+/*
+ * 
+ * _Login(){
         var self = this;
         ajax.request('user-modul-login', 'form-user-login', function (msg) {
             if (msg !== undefined) {
@@ -116,4 +218,4 @@ class UserModul{
             }
         });
     }
-}
+ */

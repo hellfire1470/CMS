@@ -12,6 +12,8 @@ require_once '../K3ksPHP/Database/Db.php';
 require_once __DIR__ . '/src/database/DBConfig.php';
 require_once __DIR__ . '/src/modul/ModulManager.php';
 require_once __DIR__ . '/src/AjaxManager.php';
+require_once __DIR__ . '/src/LayoutManager.php';
+require_once __DIR__ . '/src/functions.php';
 
 /*
  * Register Modules
