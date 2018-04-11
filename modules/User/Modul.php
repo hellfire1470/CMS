@@ -36,6 +36,13 @@ class UserModul extends Modul {
         return false;
     }
 
+    public function OnInstall() {
+        DbUser::Initialize();
+        DbUser::GetUserTable()->Create();
+        DbUser::GetUserMetaTable()->Create();
+        return true;
+    }
+
     public static function IsLoggedIn() {
         return !empty($_SESSION['user']);
     }
@@ -49,6 +56,13 @@ class UserModul extends Modul {
             self::$_user = unserialize($_SESSION['user']);
         }
         add_header('<script type="text/javascript" src="modules/User/js/user-modul.js"></script>');
+
+        AjaxManager::RegisterEvent(UserModul::$modul_prefix . 'login', $this, 'ajax_login');
+        AjaxManager::RegisterEvent(UserModul::$modul_prefix . 'logout', $this, 'ajax_logout');
+        AjaxManager::RegisterEvent(UserModul::$modul_prefix . 'register', $this, 'ajax_register');
+        AjaxManager::RegisterEvent(UserModul::$modul_prefix . 'load-aside', $this, 'ajax_load_aside');
+        AjaxManager::RegisterEvent(UserModul::$modul_prefix . 'get-user-data', $this, 'ajax_get_user_data');
+
         $this->_SetActiveLayout();
         return true;
     }
@@ -200,8 +214,3 @@ $modul = new UserModul("UserModul");
 ModulManager::RegisterModul($modul);
 
 ModulManager::RegisterShortcut('%USERPROFILE_ASIDE%', $modul, 'ShowAside');
-AjaxManager::RegisterEvent(UserModul::$modul_prefix . 'login', $modul, 'ajax_login');
-AjaxManager::RegisterEvent(UserModul::$modul_prefix . 'logout', $modul, 'ajax_logout');
-AjaxManager::RegisterEvent(UserModul::$modul_prefix . 'register', $modul, 'ajax_register');
-AjaxManager::RegisterEvent(UserModul::$modul_prefix . 'load-aside', $modul, 'ajax_load_aside');
-AjaxManager::RegisterEvent(UserModul::$modul_prefix . 'get-user-data', $modul, 'ajax_get_user_data');
