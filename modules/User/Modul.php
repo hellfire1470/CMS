@@ -63,6 +63,9 @@ class UserModul extends Modul {
         AjaxManager::RegisterEvent(UserModul::$modul_prefix . 'load-aside', $this, 'ajax_load_aside');
         AjaxManager::RegisterEvent(UserModul::$modul_prefix . 'get-user-data', $this, 'ajax_get_user_data');
 
+        ModulManager::RegisterShortcut('%USERPROFILE_ASIDE%', $this, 'ShowAside');
+
+
         $this->_SetActiveLayout();
         return true;
     }
@@ -212,5 +215,3 @@ class UserModul extends Modul {
 
 $modul = new UserModul("UserModul");
 ModulManager::RegisterModul($modul);
-
-ModulManager::RegisterShortcut('%USERPROFILE_ASIDE%', $modul, 'ShowAside');
