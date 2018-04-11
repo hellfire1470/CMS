@@ -17,11 +17,12 @@ abstract class Modul {
     private $_version;
     private $_description;
     private $_author;
-    private $_isLoaded    = false;
-    private $_isInstalled = false;
-    private $_isEnabled   = false;
-    private $_isShown     = false;
-    private $_content     = '';
+    private $_isLoaded     = false;
+    private $_isInstalled  = false;
+    private $_isEnabled    = false;
+    private $_isShown      = false;
+    private $_content      = '';
+    private $_dependencies = [];
 
     public function __construct($name, $version = 1.0, $description = '', $author = '') {
         $this->_name        = $name;
@@ -31,6 +32,18 @@ abstract class Modul {
 
         $this->_isInstalled = empty($this->GetData('installed')) ? false : true;
         $this->_isEnabled   = empty($this->GetData('enabled')) ? false : true;
+    }
+
+    public function AddDependency($modulname) {
+        if (!in_array($modulname, $this->_dependencies)) {
+            $this->_dependencies[] = $modulname;
+        }
+    }
+
+    public function AddDependencies($modulnames) {
+        foreach ($modulnames as $modulname) {
+            $this->AddDependency($modulname);
+        }
     }
 
     public function GetName() {
@@ -71,10 +84,18 @@ abstract class Modul {
 
     public function Load() {
         if ($this->_isInstalled && $this->_isEnabled && !$this->_isLoaded) {
-            ob_start();
-            if ($this->OnLoad()) {
-                $this->_isLoaded = true;
+            $load = true;
+            foreach ($this->_dependencies as $dependency) {
+                if (!ModulManager::IsModulRegistered($dependency) || !ModulManager::IsModulEnabled($dependency)) {
+                    trigger_error('Modul ' . $this->_name . ' requires Modul ' . $dependency . ' to be registered and enabled');
+                    $load = false;
+                }
             }
+            if (!$load) {
+                return;
+            }
+            ob_start();
+            $this->_isLoaded = $this->OnLoad();
             ob_end_clean();
         }
     }

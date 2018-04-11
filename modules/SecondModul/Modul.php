@@ -42,6 +42,8 @@ class SecondMod extends Modul {
 }
 
 $modul = new SecondMod('Second Modul');
+$modul->AddDependency('UserModul');
+
 ModulManager::RegisterModul($modul);
 
 ModulManager::RegisterShortcut('%MYSECONDMODUL%', $modul, 'OnShow', 'here is your parameter');

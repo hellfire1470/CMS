@@ -15,25 +15,30 @@ require_once __DIR__ . '/Modul.php';
 
 class ModulManager {
 
-    private static $_registeredModules       = array();
-    private static $_registeredModulesByName = [];
-    private static $_shortcuts               = [];
+    private static $_registeredModules = [];
+    private static $_shortcuts         = [];
 
     public static function IsModulRegistered($name) {
-        return !empty(self::$_registeredModulesByName[$name]);
+        return !empty(self::$_registeredModules[$name]);
     }
 
     public static function IsModulEnabled($name) {
         if (self::IsModulRegistered($name)) {
-            return self::$_registeredModulesByName[$name]->IsEnabled();
+            return self::$_registeredModules[$name]->IsEnabled();
+        }
+        return false;
+    }
+
+    public static function IsModulLoaded($name) {
+        if (self::IsModulRegistered($name)) {
+            return self::$_registeredModules[$name]->IsLoaded();
         }
         return false;
     }
 
     public static function RegisterModul($modul) {
         if ($modul instanceof Modul) {
-            array_push(self::$_registeredModules, $modul);
-            self::$_registeredModulesByName[$modul->GetName()] = $modul;
+            self::$_registeredModules[$modul->GetName()] = $modul;
         }
     }
 
@@ -48,7 +53,7 @@ class ModulManager {
     }
 
     public static function ShowModul($name) {
-        return !empty(self::$_registeredModulesByName[$name]) ? self::$_registeredModulesByName[$name]->Show() : '';
+        return !empty(self::$_registeredModules[$name]) ? self::$_registeredModules[$name]->Show() : '';
     }
 
     public static function RegisterShortcut($shortcut, $modul, $func, ...$params) {
@@ -69,12 +74,14 @@ class ModulManager {
         foreach (self::$_shortcuts as $shortcut => $arr) {
 
             $modul_content = '';
-            if (!empty($arr)) {
+
+            if (!empty($arr) && $arr[0]->IsLoaded()) {
                 ob_start();
                 call_user_func([$arr[0], $arr[1]], ...$arr[2]);
                 $modul_content = ob_get_contents();
                 ob_end_clean();
             }
+
             $content = str_replace($shortcut, $modul_content, $content);
         }
         return $content;
