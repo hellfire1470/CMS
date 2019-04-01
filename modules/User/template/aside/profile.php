@@ -10,7 +10,7 @@
     <div class="card-body">
         <div class="row">
             <div class="col">
-                Willkommen, <?php echo $this->GetUser()->GetAttr('firstname'); ?>
+                Willkommen, <?php echo GetUser()->GetFirstname(); ?>
             </div>
         </div>
         <div class="row">

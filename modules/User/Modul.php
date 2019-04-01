@@ -11,6 +11,9 @@
  * @author Alexander
  */
 require_once __DIR__ . '/DbUser.php';
+require_once __DIR__ . '/User.php';
+require_once __DIR__ . '/global.php';
+require_once __DIR__ . '/api/api.php';
 
 class UserModul extends Modul {
 
@@ -22,20 +25,6 @@ class UserModul extends Modul {
         return DbUser::SetAll($firstname, $lastname, $password, $email);
     }
 
-    public function Login($email, $password) {
-        $user = DbUser::GetByEmail($email);
-        if (empty($user)) {
-            return false;
-        }
-        $hash = hash('sha512', $password);
-        if ($hash == $user->GetAttr('password')) {
-            $_SESSION['user'] = serialize($user);
-            self::$_user      = $user;
-            return true;
-        }
-        return false;
-    }
-
     public function OnInstall() {
         DbUser::Initialize();
         DbUser::GetUserTable()->Create();
@@ -44,21 +33,14 @@ class UserModul extends Modul {
     }
 
     public static function IsLoggedIn() {
-        return !empty($_SESSION['user']);
-    }
-
-    public static function GetUser() {
-        return self::$_user;
+        return !empty(GetUser()) && GetUser()->IsLoggedIn();
     }
 
     public function OnLoad() {
-        if (self::IsLoggedIn()) {
-            self::$_user = unserialize($_SESSION['user']);
-        }
         add_header('<script type="text/javascript" src="modules/User/js/user-modul.js"></script>');
 
-        AjaxManager::RegisterEvent(UserModul::$modul_prefix . 'login', $this, 'ajax_login');
-        AjaxManager::RegisterEvent(UserModul::$modul_prefix . 'logout', $this, 'ajax_logout');
+        AjaxManager::RegisterEvent(UserModul::$modul_prefix . 'login', 'apiLogin'/* $this, 'ajax_login' */);
+        AjaxManager::RegisterEvent(UserModul::$modul_prefix . 'logout', 'apiLogout');
         AjaxManager::RegisterEvent(UserModul::$modul_prefix . 'register', $this, 'ajax_register');
         AjaxManager::RegisterEvent(UserModul::$modul_prefix . 'load-aside', $this, 'ajax_load_aside');
         AjaxManager::RegisterEvent(UserModul::$modul_prefix . 'get-user-data', $this, 'ajax_get_user_data');
@@ -96,46 +78,6 @@ class UserModul extends Modul {
         <button class="btn btn-secondary" onclick="UserModul.LoadAside('<?php echo $navigateTo; ?>');
                 return false;"><?php echo $btnVal; ?></button>
         <?php
-    }
-
-    private function _GetPublicUserData() {
-        if (!$this->IsLoggedIn()) {
-            return [];
-        }
-        return [
-            'firstname' => self::$_user->GetAttr('firstname'),
-            'lastname'  => self::$_user->GetAttr('lastname'),
-            'email'     => self::$_user->GetAttr('email')
-        ];
-    }
-
-    public function ajax_login($params) {
-        if ($this->IsLoggedIn()) {
-            return ['success' => true, 'data' => ['message' => 'Already Logged in']];
-        }
-
-
-        $res = ['success' => false, 'data' => ['message' => 'Login failed']];
-
-        if (empty($params['email']) || empty($params['password'])) {
-            $res['data']['message'] = 'Some fields are empty';
-            return $res;
-        }
-
-
-        $success        = $this->Login($params['email'], $params['password']);
-        $res['success'] = $success;
-
-        if ($success) {
-            $res['data']['message'] = 'Logged in as ' . self::$_user->GetAttr('firstname');
-            $res['data']['user']    = $this->_GetPublicUserData();
-        }
-        return $res;
-    }
-
-    public function ajax_logout() {
-        unset($_SESSION['user']);
-        return ['success' => true];
     }
 
     private function _GetLayout() {
@@ -213,5 +155,7 @@ class UserModul extends Modul {
 
 }
 
-$modul = new UserModul("UserModul");
-ModulManager::RegisterModul($modul);
+$userModul = new UserModul("UserModul");
+
+
+ModulManager::RegisterModul($userModul);
